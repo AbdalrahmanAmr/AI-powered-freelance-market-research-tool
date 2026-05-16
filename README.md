@@ -65,12 +65,12 @@ Pipeline flow:
 
 ## Output Files
 
-| File                       | Description                       |
-| -------------------------- | --------------------------------- |
-| `output/raw_services.json` | Raw scraped competitor data       |
-| `output/analysis.md`       | Market analysis report            |
-| `output/my_service.md`     | Your copy-paste service listings  |
-| `output/run_metrics.log`   | Token usage per run (compact log) |
+| File                     | Description                       |
+| ------------------------ | --------------------------------- |
+| `data/raw_services.json` | Raw scraped competitor data       |
+| `data/analysis.md`       | Market analysis report            |
+| `data/my_service.md`     | Your copy-paste service listings  |
+| `data/run_metrics.log`   | Token usage per run (compact log) |
 
 ---
 
@@ -85,7 +85,7 @@ freelance-researcher/
 ├── ai_backends.py   # All model backends + token metrics
 ├── config.py        # Search queries + model registry
 ├── requirements.txt
-└── output/
+└── data/
 ```
 
 ---
