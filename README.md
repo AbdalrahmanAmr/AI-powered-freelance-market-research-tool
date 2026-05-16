@@ -1,39 +1,50 @@
-# AI-powered Freelance Market Research Tool
-
 # Freelance Market Research Pipeline
 
-Scrapes Khamsat + Mostaql for competitor services, sends data to Claude API,
-and generates a market analysis + ready-to-paste service listings.
+Scrapes Khamsat + Mostaql → AI analysis → copy-paste service listings.
 
 ---
 
 ## Setup (one time)
-
-### 1. Install Python dependencies
 
 ```bash
 pip install -r requirements.txt
 playwright install chromium
 ```
 
-### 2. Set your Anthropic API key
+---
 
-```bash
-# On Linux/Mac
-export ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxxxxxx
+## API Keys
 
-# On Windows CMD
-set ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxxxxxx
+### 1. Gemini (Free)
 
-# On Windows PowerShell
-$env:ANTHROPIC_API_KEY="sk-ant-xxxxxxxxxxxxxxxx"
-```
+- Go to: https://aistudio.google.com/app/apikey
+- Create key → copy it
+- `set GEMINI_API_KEY=your_key` (Windows CMD)
 
-Get your API key from: https://console.anthropic.com/
+### 2. Groq (Free — fastest)
 
-### 3. Edit your skills in analyzer.py
+- Go to: https://console.groq.com/keys
+- Sign up free → Create API Key → copy it
+- `set GROQ_API_KEY=your_key`
+- Model used: `llama-3.3-70b-versatile`
+- Free limit: ~6,000 tokens/minute
 
-Open `analyzer.py` and update the `MY_SKILLS` variable with your current skills.
+### 3. OpenRouter (Free models available)
+
+- Go to: https://openrouter.ai/settings/keys
+- Sign up → Create Key → copy it
+- `set OPENROUTER_API_KEY=your_key`
+- Model used: `mistralai/mistral-7b-instruct:free`
+- Free tier: no hard TPM cap, rate limited per IP
+
+### 4. Claude (Paid)
+
+- Go to: https://console.anthropic.com/
+- Add $5 credit → Settings → API Keys → Create
+- `set ANTHROPIC_API_KEY=sk-ant-...`
+
+> **Student tip:** Groq and Gemini are both fully free with no card required.
+> Start with Groq for speed, Gemini for larger context windows.
 
 ---
 
@@ -43,25 +54,23 @@ Open `analyzer.py` and update the `MY_SKILLS` variable with your current skills.
 python main.py
 ```
 
-Or run steps separately:
+Pipeline flow:
 
-```bash
-# Only scrape (no API key needed)
-python scraper.py
-
-# Only analyze (uses existing output/raw_services.json)
-python analyzer.py
-```
+1. Pick your AI model
+2. Pick which service categories to scrape (and which queries per category)
+3. Scraper runs on Khamsat + Mostaql
+4. AI analyzes competitors → generates your listings
 
 ---
 
-## Output
+## Output Files
 
-| File                       | Description                          |
-| -------------------------- | ------------------------------------ |
-| `output/raw_services.json` | Raw scraped competitor data          |
-| `output/analysis.md`       | Market analysis report by Claude     |
-| `output/my_service.md`     | Your ready-to-paste service listings |
+| File                       | Description                       |
+| -------------------------- | --------------------------------- |
+| `output/raw_services.json` | Raw scraped competitor data       |
+| `output/analysis.md`       | Market analysis report            |
+| `output/my_service.md`     | Your copy-paste service listings  |
+| `output/run_metrics.log`   | Token usage per run (compact log) |
 
 ---
 
@@ -69,27 +78,22 @@ python analyzer.py
 
 ```
 freelance-researcher/
-├── main.py              # Full pipeline runner
-├── scraper.py           # Playwright scraper (Khamsat + Mostaql)
-├── analyzer.py          # Claude API analysis + generation
-├── requirements.txt     # Python dependencies
-├── output/
-│   ├── raw_services.json
-│   ├── analysis.md
-│   └── my_service.md
-└── logs/
+├── main.py          # Entry point — orchestrates everything
+├── menu.py          # Interactive CLI menus
+├── scraper.py       # Playwright scraper (Khamsat + Mostaql)
+├── analyzer.py      # Prompt builder + AI calls
+├── ai_backends.py   # All model backends + token metrics
+├── config.py        # Search queries + model registry
+├── requirements.txt
+└── output/
 ```
 
 ---
 
 ## Troubleshooting
 
-**Scraped 0 services?**
-The site structure may have changed. Open `scraper.py` and update the CSS selectors
-in `scrape_khamsat()` or `scrape_mostaql()`. Use browser DevTools to find the right selectors.
+**0 services scraped?**
+Site structure may have changed. Open `scraper.py`, update CSS selectors using browser DevTools (F12 → Inspector → find the card element class).
 
-**API key error?**
-Make sure the env variable is exported in the same terminal session you run the script from.
-
-**Playwright not found?**
-Run `playwright install chromium` after pip install.
+**Wrong model package missing?**
+Install only what you need: `pip install groq` or `pip install google-genai` etc.

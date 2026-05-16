@@ -1,0 +1,13 @@
+# Keys — never commit
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Output (optional — remove these lines if you want to commit reports)
+data/raw/
+data/logs/
+data/reports/
+output/

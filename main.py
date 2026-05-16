@@ -1,68 +1,49 @@
 """
-main.py — Full pipeline: scrape → analyze → generate service listings
-Usage: python main.py
+main.py — Pipeline entry point.
+Supports src/ layout: adds src/ to path so imports resolve correctly.
 """
 
 import asyncio
-import os
 import sys
+import os
+
+# ── Support src/ project layout ──────────────────────────
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+
+from menu import pick_model, pick_categories, check_env, check_deps
 from scraper import run_scraper
 from analyzer import run_analyzer
 
 
-def check_env():
-    """Make sure ANTHROPIC_API_KEY is set."""
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        print("❌ ERROR: ANTHROPIC_API_KEY environment variable not set.")
-        print("\nFix it by running:")
-        print("  export ANTHROPIC_API_KEY=sk-ant-...")
-        sys.exit(1)
-
-
-def check_deps():
-    """Check required packages are installed."""
-    missing = []
-    try:
-        import playwright
-    except ImportError:
-        missing.append("playwright")
-    try:
-        import anthropic
-    except ImportError:
-        missing.append("anthropic")
-
-    if missing:
-        print(f"❌ Missing packages: {', '.join(missing)}")
-        print("\nInstall them with:")
-        print(f"  pip install {' '.join(missing)}")
-        if "playwright" in missing:
-            print("  playwright install chromium")
-        sys.exit(1)
-
-
 async def main():
-    print("=" * 55)
-    print("  Freelance Market Research Pipeline")
-    print("  Khamsat + Mostaql → Claude Analysis")
-    print("=" * 55)
+    # Step 1: Model selection
+    model = pick_model()
+    check_env(model)
+    check_deps(model)
 
-    check_env()
-    check_deps()
+    # Step 2: Category + query selection
+    selected_categories = pick_categories()
 
-    # Step 1: Scrape
-    print("\n[1/2] Starting scraper...")
-    await run_scraper()
+    # Step 3: Scrape
+    print("\n" + "═" * 56)
+    print("  [1/2] Scraping...")
+    print("═" * 56)
+    await run_scraper(selected_categories)
 
-    # Step 2: Analyze
-    print("\n[2/2] Starting analyzer...")
-    run_analyzer()
+    # Step 4: Analyze
+    print("\n" + "═" * 56)
+    print("  [2/2] Analyzing...")
+    print("═" * 56)
+    run_analyzer(model_id=model["id"])
 
-    print("\n" + "=" * 55)
+    # Done
+    print("\n" + "═" * 56)
     print("  Pipeline complete! Files in output/:")
-    print("  - raw_services.json   (raw scraped data)")
-    print("  - analysis.md         (market analysis)")
-    print("  - my_service.md       (your ready listings)")
-    print("=" * 55)
+    print("    raw_services.json   — scraped competitor data")
+    print("    analysis.md         — market analysis report")
+    print("    my_service.md       — your copy-paste listings")
+    print("    run_metrics.log     — token usage history")
+    print("═" * 56 + "\n")
 
 
 if __name__ == "__main__":
